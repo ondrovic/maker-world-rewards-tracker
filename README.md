@@ -1,5 +1,7 @@
 # Maker World Reward Tracker
 
+![Alt text](image.png)
+
 ## Project Structure
 
 `README.MD` - This file your looking at
