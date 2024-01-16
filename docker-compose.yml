@@ -1,0 +1,60 @@
+version: "3.6"
+services:
+  api:
+    image: python:3.11-slim
+    container_name: api
+    env_file: .env
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    working_dir: /app
+    environment:
+      - TZ=${TIMEZONE}
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - type: bind
+        source: ./data
+        target: /app/data
+    restart: unless-stopped
+
+  task:
+    image: python:3.11-alpine
+    container_name: task
+    env_file: .env
+    build:
+      context: ./task
+      dockerfile: Dockerfile
+    environment:
+      - TZ=${TIMEZONE}
+    volumes:
+      - type: bind
+        source: ./data
+        target: /app/data
+    restart: unless-stopped
+
+  ui:
+    image: node:alpine
+    container_name: ui
+    env_file: .env
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT}:${WEB_PORT}"
+    working_dir: /app
+    environment:
+      - TZ=${TIMEZONE}
+    volumes:
+      - type: bind
+        source: ./data
+        target: /app/data
+    restart: unless-stopped
+    depends_on:
+      - api
+      - task
+    
+networks:
+  rewards_network:

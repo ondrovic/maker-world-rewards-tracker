@@ -1,0 +1,5 @@
+# ignore .env
+.env
+
+# keep example
+!.env.exmaple

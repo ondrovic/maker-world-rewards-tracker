@@ -1,0 +1,7 @@
+# ignore actual json file
+data.json
+last-updated.json
+
+# make sure to keep the examples though
+!data.json.example
+!last-updated.json.example

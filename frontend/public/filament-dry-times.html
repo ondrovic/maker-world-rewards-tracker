@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <title>Filament Dryer Times</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS v5.3 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+</head>
+
+<body>
+    <header />
+    <main>
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-1">
+                    <i id="theme-toggle" class="fas fa-adjust" data-toggle="tooltip" data-bs-toggle=""
+                        data-bs-tooltip="Light" title="Light" onclick="toggleTheme()"></i>
+                </div>
+                <div class="col-11">
+                    <select id="materialFilter" class="form-select">
+                        <option value="all">Select a Material</option>
+                        <option value="PLA">PLA</option>
+                        <option value="ABS">ABS</option>
+                        <option value="PETG/CPE">PETG/CPE</option>
+                        <option value="NYLON">NYLON</option>
+                        <option value="DESICCANT">DESICCANT</option>
+                        <option value="PVA">PVA</option>
+                        <option value="TPU/TPE">TPU/TPE</option>
+                        <option value="ASA">ASA</option>
+                        <option value="PP">PP</option>
+                        <option value="HIPS">HIPS</option>
+                        <option value="PC">PC</option>
+                        <option value="PEEK">PEEK</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+        <table class="table table-striped text-center print">
+            <thead>
+                <tr>
+                    <th scope="col">Material(s)</th>
+                    <th scope="col">Temperature</th>
+                    <th scope="col">Minimum Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>PLA</td>
+                    <td>55°C (131°F)</td>
+                    <td>3h</td>
+                </tr>
+                <tr>
+                    <td>ABS</td>
+                    <td>65°C (149°F)</td>
+                    <td>3h</td>
+                </tr>
+                <tr>
+                    <td>PETG/CPE</td>
+                    <td>65°C (149°F)</td>
+                    <td>3h</td>
+                </tr>
+                <tr>
+                    <td>NYLON</td>
+                    <td>75°C (167°F)</td>
+                    <td>12h</td>
+                </tr>
+                <tr>
+                    <td>DESICCANT</td>
+                    <td>65°C (149°F)</td>
+                    <td>3h</td>
+                </tr>
+                <tr>
+                    <td>PVA</td>
+                    <td>45°C (113°F)</td>
+                    <td>10h</td>
+                </tr>
+                <tr>
+                    <td>TPU/TPE</td>
+                    <td>55°C (113°F)</td>
+                    <td>4h</td>
+                </tr>
+                <tr>
+                    <td>ASA</td>
+                    <td>65°C (149°F)</td>
+                    <td>4h</td>
+                </tr>
+                <tr>
+                    <td>PP</td>
+                    <td>55°C (131°F)</td>
+                    <td>66</td>
+                </tr>
+                <tr>
+                    <td>HIPS</td>
+                    <td>65°C (149°F)</td>
+                    <td>4h</td>
+                </tr>
+                <tr>
+                    <td>PC</td>
+                    <td>75°C (167°F)</td>
+                    <td>6h</td>
+                </tr>
+                <tr>
+                    <td>PEEK</td>
+                    <td>75°C (167°F)</td>
+                    <td>6h</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+    <footer />
+    <!-- Bootstrap JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const materialSelect = document.getElementById("materialFilter");
+            const tableRows = document.querySelectorAll("tbody tr");
+
+            materialSelect.addEventListener("change", function () {
+                const selectedMaterial = materialSelect.value;
+
+                tableRows.forEach((row) => {
+                    const materialCell = row.cells[0]; // Get the first cell (index 0) with material name
+
+                    if (selectedMaterial === "all" || materialCell.textContent === selectedMaterial) {
+                        row.style.display = "table-row";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            });
+
+            new window.bootstrap.Tooltip(document.body, {
+                selector: '[data-bs-toggle~="tooltip"]',
+                container: 'body'
+            });
+        });
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            document.documentElement.setAttribute('data-bs-theme', newTheme);
+
+            // Update the tooltip text based on the new theme
+            const icon = document.getElementById('theme-toggle');
+
+            icon.setAttribute('data-bs-original-title', newTheme === 'light' ? 'Dark' : 'Light');
+            icon.title = newTheme === 'light' ? 'Dark' : 'Light';
+        }
+
+
+    </script>
+</body>
+
+</html>
