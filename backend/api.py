@@ -45,6 +45,34 @@ def get_last_updated():
     except FileNotFoundError:
         return jsonify({"error": f"{LAST_UPDATE_FILENAME} not found"}), 404
 
+@app.route("/current-point-value", methods=["POST"])
+def calculate_money_from_points():
+    try:
+        conversion_rate = evaluate_conversion_rate((get_env_variables("POINT_CONVERSION_RATE")))
+        with open(get_env_variables("DATA_FILENAME"), "r") as json_file:
+            data = json.load(json_file)
+            
+        current_points = data.get("currentPoints")
+        
+        dollar_amount = round(current_points * conversion_rate)
+        
+        num_of_gift_cards = math.floor(dollar_amount / 40)
+        
+        formatted_dollar_amount = f"${dollar_amount:.2f}"
+        
+        return jsonify(
+            {
+                'currentPoints': current_points,
+                'dollarAmount': formatted_dollar_amount,
+                'numOfGiftCards': num_of_gift_cards
+            }
+        )
+        
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/needed-points", methods=["POST"])
 def calculate_needed_points():
     try:
