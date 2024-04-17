@@ -35,6 +35,54 @@ After completing the [SETUP](#Setup) steps all you need to do is
 2. `docker compose up --build --force-recreate -d`
 3. Navigate to http://localhost
 
+## API Endpoints
+
+* **POST /needed-points**
+
+  * **Description:** Allow you to calculate how many points you will need based on a dollar amount
+  * **Method:** POST
+  * **Request:**
+   * **Body:** JSON object containing dollar amount
+   * **Example Body:**
+      ```json
+      {
+         "dollarAmount": "281.88"
+      }
+      ```
+  * **Response:**
+    * **Status Codes:**
+      * 200: Success - Returns point values
+      * 400: Bad Request
+    
+
+* **POST /current-point-value**
+   * **Method:** POST
+   * **Response:**
+      ```json
+      {
+         "currentPoints": x,
+         "dollarAmount": "$x.x",
+         "numOfGiftCards": x
+      }
+      ```
+* **GET /current-points**
+   * **Method:** GET
+   * **Response:**
+      ```json
+      {
+         "currentPoints": x
+      }
+      ```
+* **GET /last-updated**
+   * **Method:** GET
+   * **Response:**
+      ```json
+         {
+            "lastUpdate": "xxxx-xx-xx xx:xx XX"
+         }
+      ```
+
+
 ## Technologies used
 
 1. [Docker](https://docker.com/)

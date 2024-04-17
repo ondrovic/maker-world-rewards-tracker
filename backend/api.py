@@ -6,6 +6,7 @@ from flask_cors import CORS
 import requests, json, os, math
 from datetime import datetime
 from dotenv import load_dotenv
+import re
 
 app = Flask(__name__)
 app.environment = 'production'
@@ -77,22 +78,39 @@ def calculate_money_from_points():
 def calculate_needed_points():
     try:
         data = request.get_json()
-        dollar_amount = data.get('dollarAmount')
-        
+
+        # Check for missing dollarAmount and raise an informative error
+        if 'dollarAmount' not in data:
+            raise ValueError('Missing required parameter: dollarAmount')
+
+        dollar_amount_str = data['dollarAmount']
+
+        # Validate dollarAmount format using a relaxed regex (no $)
+        currency_pattern = r"^(\d+|\d+(\.\d+))$"  # Matches integer or decimal
+        if not re.match(currency_pattern, dollar_amount_str):
+            raise ValueError('Invalid dollarAmount format. Please enter a number (integer or decimal).')
+
+        # Convert to float after validation, handling integers gracefully
+        try:
+            dollar_amount = float(dollar_amount_str)
+        except ValueError:
+            # If conversion fails, assume it's an integer and convert explicitly
+            dollar_amount = int(dollar_amount_str)
+
         conversion_rate = evaluate_conversion_rate((get_env_variables("POINT_CONVERSION_RATE")))
 
-        if dollar_amount is None:
-            raise ValueError('Missing required parameter: dollarAmount')
         if conversion_rate is None:
             raise ValueError('Missing required parameter: POINT_CONVERSION_RATE')
-        
+
         points = dollar_amount / conversion_rate
         rounded_points = math.floor(points)
-        
         result = int(round(rounded_points))
-        
+
         return jsonify({'requiredPoints': result})
-    
+
+    except (ValueError, KeyError) as e:
+        return jsonify({"error": str(e)}), 400  # Return 400 for missing params
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
