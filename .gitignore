@@ -4,3 +4,5 @@
 !.env.example
 # ignore venv
 venv/
+# ignore .vsvode
+.vscode/

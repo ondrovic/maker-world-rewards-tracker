@@ -1,119 +1,116 @@
-"""
-Serves up files that get updated via the maker-world-api.py
-    """
-from flask import Flask, jsonify, request
-from flask_cors import CORS
-import requests, json, os, math
-from datetime import datetime
+from fastapi import FastAPI, Request, APIRouter, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+import json
+import os
+import math
 from dotenv import load_dotenv
 import re
-
-app = Flask(__name__)
-app.environment = 'production'
-CORS(app)
+from decimal import Decimal, ROUND_DOWN
 
 load_dotenv()
 
-def get_env_variables(key):
+app = FastAPI()
+app.environment = 'production'
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+def get_env_variable(key: str) -> str:
     value = os.getenv(key)
     if value is None:
         raise ValueError(f"Environment variable {key} not set")
     return value
 
-
-def evaluate_conversion_rate(conversion_rate):
+def evaluate_conversion_rate(conversion_rate: str) -> Decimal:
     try:
-        return eval(conversion_rate)
+        return Decimal(conversion_rate)
     except:
         raise ValueError("Invalid conversion rate format")
 
-@app.route("/current-points", methods=["GET"])
-def get_current_points():
+app.title = get_env_variable("SWAGGER_UI_TITLE")
+app.description = get_env_variable("SWAGGER_UI_DESCRIPTION")
+
+router = APIRouter()
+
+async def process_last_updated() -> str:
     try:
-        with open(get_env_variables("DATA_FILENAME"), "r") as json_file:
+        with open(get_env_variable("LAST_UPDATE_FILENAME"), "r") as json_file:
             data = json.load(json_file)
-        return jsonify(data)
+        return data.get('lastUpdate', "")
     except FileNotFoundError:
-        return jsonify({"error": f"{DATA_FILENAME} not found"}), 404
+        return ""
 
-
-@app.route("/last-updated", methods=["GET"])
-def get_last_updated():
+@app.get("/current-points", tags=["points"])
+async def get_current_points() -> JSONResponse:
     try:
-        with open(get_env_variables("LAST_UPDATE_FILENAME"), "r") as json_file:
+        with open(get_env_variable("DATA_FILENAME"), "r") as json_file:
             data = json.load(json_file)
-        return jsonify(data)
+        return JSONResponse(content=data)
     except FileNotFoundError:
-        return jsonify({"error": f"{LAST_UPDATE_FILENAME} not found"}), 404
+        raise HTTPException(status_code=404, detail=f"{get_env_variable('DATA_FILENAME')} not found")
 
-@app.route("/current-point-value", methods=["GET"])
-def calculate_money_from_points():
+@app.get("/last-updated", tags=["status"])
+async def get_last_updated() -> JSONResponse:
+    last_updated = await process_last_updated()
+    if last_updated:
+        return JSONResponse(content={"lastUpdate": last_updated})
+    else:
+        raise HTTPException(status_code=404, detail=f"{get_env_variable('LAST_UPDATE_FILENAME')} not found")
+
+@app.get("/current-point-value", tags=["points"])
+async def calculate_money_from_points() -> JSONResponse:
     try:
-        conversion_rate = evaluate_conversion_rate((get_env_variables("POINT_CONVERSION_RATE")))
-        with open(get_env_variables("DATA_FILENAME"), "r") as json_file:
+        conversion_rate = evaluate_conversion_rate(get_env_variable("POINT_CONVERSION_RATE"))
+        with open(get_env_variable("DATA_FILENAME"), "r") as json_file:
             data = json.load(json_file)
-            
+
         current_points = data.get("currentPoints")
-        
-        dollar_amount = round(current_points * conversion_rate)
-        
-        num_of_gift_cards = math.floor(dollar_amount / 40)
-        
+        last_updated = await process_last_updated()
+
+        dollar_amount = Decimal(current_points) * conversion_rate
+        # num_of_gift_cards = float(dollar_amount / Decimal(40))  # Convert to float for JSON serialization
+        num_of_gift_cards = math.floor(dollar_amount / Decimal(40))
+
         formatted_dollar_amount = f"${dollar_amount:.2f}"
-        
-        return jsonify(
-            {
-                'currentPoints': current_points,
-                'dollarAmount': formatted_dollar_amount,
-                'numOfGiftCards': num_of_gift_cards
-            }
-        )
-        
-        
+
+        return JSONResponse(content={
+            'currentPoints': current_points,
+            'dollarAmount': formatted_dollar_amount,
+            'numOfGiftCards': num_of_gift_cards,
+            'lastUpdate': last_updated
+        })
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
+class DollarAmountRequest(BaseModel):
+    dollarAmount: str = Field(..., example="900", description="The dollar amount as a string")
 
-@app.route("/needed-points", methods=["POST"])
-def calculate_needed_points():
+@app.post("/needed-points", tags=["points"])
+async def calculate_needed_points(request: DollarAmountRequest) -> JSONResponse:
     try:
-        data = request.get_json()
+        dollar_amount_str = request.dollarAmount
+        currency_pattern = re.compile(r"^(\d+|\d+(\.\d+))$")
 
-        # Check for missing dollarAmount and raise an informative error
-        if 'dollarAmount' not in data:
-            raise ValueError('Missing required parameter: dollarAmount')
-
-        dollar_amount_str = data['dollarAmount']
-
-        # Validate dollarAmount format using a relaxed regex (no $)
-        currency_pattern = r"^(\d+|\d+(\.\d+))$"  # Matches integer or decimal
-        if not re.match(currency_pattern, dollar_amount_str):
+        if not currency_pattern.match(dollar_amount_str):
             raise ValueError('Invalid dollarAmount format. Please enter a number (integer or decimal).')
 
-        # Convert to float after validation, handling integers gracefully
-        try:
-            dollar_amount = float(dollar_amount_str)
-        except ValueError:
-            # If conversion fails, assume it's an integer and convert explicitly
-            dollar_amount = int(dollar_amount_str)
+        dollar_amount = Decimal(dollar_amount_str)
+        conversion_rate = evaluate_conversion_rate(get_env_variable("POINT_CONVERSION_RATE"))
 
-        conversion_rate = evaluate_conversion_rate((get_env_variables("POINT_CONVERSION_RATE")))
+        required_points = (dollar_amount / conversion_rate).quantize(Decimal('1.'), rounding=ROUND_DOWN)
+        return JSONResponse(content={'requiredPoints': int(required_points)})
 
-        if conversion_rate is None:
-            raise ValueError('Missing required parameter: POINT_CONVERSION_RATE')
-
-        points = dollar_amount / conversion_rate
-        rounded_points = math.floor(points)
-        result = int(round(rounded_points))
-
-        return jsonify({'requiredPoints': result})
-
-    except (ValueError, KeyError) as e:
-        return jsonify({"error": str(e)}), 400  # Return 400 for missing params
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=False, port=get_env_variables("API_PORT"))
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(get_env_variable("API_PORT")), log_level="info")
