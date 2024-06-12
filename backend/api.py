@@ -46,7 +46,7 @@ def get_last_updated():
     except FileNotFoundError:
         return jsonify({"error": f"{LAST_UPDATE_FILENAME} not found"}), 404
 
-@app.route("/current-point-value", methods=["POST"])
+@app.route("/current-point-value", methods=["GET"])
 def calculate_money_from_points():
     try:
         conversion_rate = evaluate_conversion_rate((get_env_variables("POINT_CONVERSION_RATE")))

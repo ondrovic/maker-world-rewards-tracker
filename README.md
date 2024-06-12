@@ -55,8 +55,8 @@ After completing the [SETUP](#Setup) steps all you need to do is
       * 400: Bad Request
     
 
-* **POST /current-point-value**
-   * **Method:** POST
+* **GET /current-point-value**
+   * **Method:** GET
    * **Response:**
       ```json
       {

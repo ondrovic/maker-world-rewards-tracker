@@ -2,3 +2,5 @@
 .env
 # keep the example
 !.env.example
+# ignore venv
+venv/
