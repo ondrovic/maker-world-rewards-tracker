@@ -38,7 +38,7 @@ After completing the [SETUP](#Setup) steps all you need to do is
 ## API Endpoints Documentation
 After successfully [Deploying](#Deployment)
 
-1. Navigate to http://localhost:<port-number-as-you-defined>/docs
+1. Navigate to http://localhost:{port-number-as-you-defined}/docs
 
    You should see something similar
 
