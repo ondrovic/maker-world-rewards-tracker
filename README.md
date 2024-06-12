@@ -38,7 +38,8 @@ After completing the [SETUP](#Setup) steps all you need to do is
 ## API Endpoints Documentation
 After successfully [Deploying](#Deployment)
 
-1. Navigate to http://localhost:{port-number-as-you-defined}/docs
+1. Navigate to http://localhost:5001/docs
+   * Note: the port should match the port in `.env -> API_PORT`
 
    You should see something similar
 
@@ -53,4 +54,4 @@ After successfully [Deploying](#Deployment)
 4. [React](https://react.dev/)
 5. [Redux](https://redux.js.org/)
 6. [Python](https://www.python.org/)
-   a. [FastAPI](https://fastapi.tiangolo.com/)
+   * [FastAPI](https://fastapi.tiangolo.com/)
