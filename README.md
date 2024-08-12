@@ -1,3 +1,4 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/ondrovic/maker-world-rewards-tracker/badge)](https://www.codefactor.io/repository/github/ondrovic/maker-world-rewards-tracker)
 # Maker World Reward Tracker
 
 ![Alt text](image.png)
