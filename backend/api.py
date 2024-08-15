@@ -8,6 +8,7 @@ import math
 from dotenv import load_dotenv
 import re
 from decimal import Decimal, ROUND_DOWN
+import uvicorn
 
 load_dotenv()
 
@@ -112,5 +113,4 @@ async def calculate_needed_points(request: DollarAmountRequest) -> JSONResponse:
         raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(get_env_variable("API_PORT")), log_level="info")

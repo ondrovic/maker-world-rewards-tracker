@@ -20,6 +20,8 @@ import {
   setProgressBarColor 
 } from './redux/actions';
 
+// TODO: track errors coming back from api and display in ui
+
 const App: React.FC<AppProps> = ({
   currentPoints,
   neededPoints,

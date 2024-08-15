@@ -3,3 +3,5 @@
 
 # keep example
 !.env.exmaple
+
+node_modules/
