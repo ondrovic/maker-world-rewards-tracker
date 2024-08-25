@@ -1,26 +1,22 @@
-import { Card, Col, Container, Form, Row } from 'react-bootstrap';
-import React, { useCallback, useEffect } from 'react';
-import { cardStyle, containerStyle, iconStyle, progressBarStyle } from './styles/styles'
 import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
-
-
-import { AppProps } from './interfaces/AppProps';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Helmet } from 'react-helmet-async';
+import React, { useCallback, useEffect } from 'react';
+import { Card, Col, Container, Form, Row } from 'react-bootstrap';
 import ProgressBar from 'react-bootstrap/ProgressBar';
-import { RootState } from './redux/reducers';
+import { Helmet } from 'react-helmet-async';
 import { connect } from 'react-redux';
-import { 
-  setNeededPoints, 
-  setCurrentPoints, 
-  setLastUpdate, 
-  setIsDarkMode, 
-  setError, 
+import { AppProps } from './interfaces/AppProps';
+import {
   setCurrentPercentage,
-  setProgressBarColor 
+  setCurrentPoints,
+  setError,
+  setIsDarkMode,
+  setLastUpdate,
+  setNeededPoints,
+  setProgressBarColor
 } from './redux/actions';
-
-// TODO: track errors coming back from api and display in ui
+import { RootState } from './redux/reducers';
+import { cardStyle, containerStyle, iconStyle, progressBarStyle } from './styles/styles';
 
 const App: React.FC<AppProps> = ({
   currentPoints,

@@ -1,0 +1,41 @@
+name: Generate Config
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository-name:
+        description: 'The name of the repository'
+        required: false
+        default: ''
+        type: string
+
+# Add this permissions block at the top level of your workflow
+permissions:
+  contents: write
+
+jobs:
+  generate-config:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Git
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+    
+    - name: Run generate_config.sh
+      run: |
+        chmod +x .github/scripts/generate_config.sh
+        .github/scripts/generate_config.sh ${{ github.event.inputs.repository-name || github.repository }}
+    
+    - name: Commit and push generated config
+      run: |
+        git add .github/ISSUE_TEMPLATE/config.yml
+        git add .github/ISSUE_TEMPLATE/issue_template_configured.txt
+        git commit -m "Update generated config.yml and issue_template_configured.txt"
+        git push
