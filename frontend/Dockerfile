@@ -15,8 +15,8 @@ RUN npm run build
 
 # final
 FROM ubuntu:noble
-RUN apt-get update
-RUN apt-get install nginx -y \
+RUN apt-get update \
+ && apt-get install nginx -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
