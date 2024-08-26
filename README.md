@@ -1,3 +1,4 @@
+![License](https://img.shields.io/badge/license-MIT-blue)
 [![CodeFactor](https://www.codefactor.io/repository/github/ondrovic/maker-world-rewards-tracker/badge)](https://www.codefactor.io/repository/github/ondrovic/maker-world-rewards-tracker)
 # Maker World Reward Tracker
 

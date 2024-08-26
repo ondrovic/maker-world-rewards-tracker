@@ -14,9 +14,11 @@ RUN npm install
 RUN npm run build
 
 # final
-FROM ubuntu
+FROM ubuntu as app
 RUN apt-get update
-RUN apt-get install nginx -y
+RUN apt-get install nginx -y \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/dist /var/www/html
 COPY --from=build /app/node_modules /app/node_modules

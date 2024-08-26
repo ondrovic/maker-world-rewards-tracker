@@ -10,7 +10,7 @@ FROM python:3.11-alpine
 
 ENV TZ=$TZ
 #RUN apt-get update && apt-get install -y cron tzdata && rm -rf /var/lib/apt/lists/*
-RUN apk update && apk add -U tzdata
+RUN apk update && apk --no-cache add -U tzdata
 #RUN apk add --no-cache tzdata
 
 # Creating Working Directory

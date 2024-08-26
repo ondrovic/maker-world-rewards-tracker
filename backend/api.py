@@ -32,8 +32,13 @@ def get_env_variable(key: str) -> str:
 def evaluate_conversion_rate(conversion_rate: str) -> Decimal:
     try:
         return Decimal(conversion_rate)
-    except:
-        raise ValueError("Invalid conversion rate format")
+    except ValueError:
+        try:
+            # Try to parse the conversion rate as a fraction
+            numerator, denominator = map(int, conversion_rate.split('/'))
+            return Decimal(numerator) / Decimal(denominator)
+        except ValueError:
+            raise ValueError("Invalid conversion rate format")
 
 app.title = get_env_variable("SWAGGER_UI_TITLE")
 app.description = get_env_variable("SWAGGER_UI_DESCRIPTION")
@@ -113,4 +118,4 @@ async def calculate_needed_points(request: DollarAmountRequest) -> JSONResponse:
         raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(get_env_variable("API_PORT")), log_level="info")
+    uvicorn.run(app, host=get_env_variable("API_BIND_ADDRESS"), port=int(get_env_variable("API_PORT")), log_level="info")
