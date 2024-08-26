@@ -11,6 +11,7 @@ services:
     working_dir: /app
     environment:
       - TZ=${TIMEZONE}
+      - API_BIND_ADDRESS=${API_BIND_ADDRESS}
     volumes:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"

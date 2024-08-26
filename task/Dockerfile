@@ -25,7 +25,7 @@ COPY requirements.txt .
 COPY maker-world-api.py .
 
 # upgrade pip
-RUN pip install --upgrade pip
+RUN pip install --no-cache-dir --upgrade pip
 # Install all of necessary modules from the requiremen.txt file
 RUN pip install --no-cache-dir -r requirements.txt
 
