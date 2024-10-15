@@ -1,10 +1,12 @@
-import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect } from 'react';
-import { Card, Col, Container, Form, Row } from 'react-bootstrap';
-import ProgressBar from 'react-bootstrap/ProgressBar';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { connect } from 'react-redux';
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import FilamentDryTimes from './components/FilamentDryTimes';
+import NavBar from './components/NavBar';
+import RewardTracker from './components/RewardTracker';
 import { AppProps } from './interfaces/AppProps';
 import {
   setCurrentPercentage,
@@ -16,7 +18,6 @@ import {
   setProgressBarColor
 } from './redux/actions';
 import { RootState } from './redux/reducers';
-import { cardStyle, containerStyle, iconStyle, progressBarStyle } from './styles/styles';
 
 const App: React.FC<AppProps> = ({
   currentPoints,
@@ -32,124 +33,69 @@ const App: React.FC<AppProps> = ({
   setCurrentPercentage,
   setProgressBarColor,
 }) => {
-  const handleThemeToggle = (): void => {
-    setIsDarkMode(!isDarkMode);
-  };
 
-  const getProgressBarColor = useCallback(() => {
-    if (currentPercentage <= 33) {
-      setProgressBarColor('info');
-    } else if (currentPercentage <= 90) {
-      setProgressBarColor('danger');
-    } else {
-      setProgressBarColor('success');
-    }
-  }, [currentPercentage, setProgressBarColor]);
+  const navItems = [
+    { name: "Reward Tracker", href: "/" },
+    { name: "Filament Dry Times", href: "/filament-dry-times" },
+  ];
 
-  const calculatePercentage = useCallback(() => {
-    try {
-      const error: string | null = null;
+  const siteTitle = import.meta.env.VITE_APP_TITLE || '';
 
-      if (neededPoints === 0) {
-        throw new Error("Cannot calculate percentage when neededPoints is 0");
-      }
-
-      const percentage = (currentPoints / neededPoints) * 100;
-
-      setCurrentPercentage(parseFloat(percentage.toFixed(2)));
-      getProgressBarColor();
-
-      if (error !== null && error !== undefined) setError(null);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
-    }
-  }, [currentPoints, neededPoints, setCurrentPercentage, setError, getProgressBarColor]);
-
+  const error = null
+  // Use useEffect to handle theme updates
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [pointsResponse, lastUpdatedResponse] = await Promise.all([
-          fetch(import.meta.env.VITE_APP_POINTS_ROUTE || ''),
-          fetch(import.meta.env.VITE_APP_UPDATED_ROUTE || ''),
-        ]);
-
-        if (!pointsResponse.ok) {
-          throw new Error(`HTTP error! Points Status: ${pointsResponse.status}`);
-        }
-        if (!lastUpdatedResponse.ok) {
-          throw new Error(`HTTP error! Last Updated Status: ${lastUpdatedResponse.status}`);
-        }
-
-        const [pointsData, lastUpdatedData] = await Promise.all([
-          pointsResponse.json(),
-          lastUpdatedResponse.json(),
-        ]);
-
-        setCurrentPoints(pointsData.currentPoints);
-        setLastUpdate(lastUpdatedData.lastUpdate);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        }
-      }
-    };
-
-    fetchData();
-  }, [
-    setCurrentPoints, setLastUpdate, setError
-  ]);
-
-  // set theme based on isDarkMode
-  document.documentElement.dataset.bsTheme = isDarkMode ? 'dark' : 'light';
-
-  // calculate the percentage 
-  calculatePercentage();
+    document.documentElement.dataset.bsTheme = isDarkMode ? 'dark' : 'light';
+  }, [isDarkMode]);
 
   return (
-    <Container className='flex' style={containerStyle}>
+    <>
       <Helmet>
-        <title>{import.meta.env.VITE_APP_TITLE || ''}</title>
+        <title>{siteTitle}</title>
       </Helmet>
-      <Row>
-        <Col>
-          <Card style={cardStyle}>
-            <Card.Header>
-              <FontAwesomeIcon
-                icon={isDarkMode ? faSun : faMoon}
-                onClick={handleThemeToggle}
-                style={iconStyle}
-              />
-            </Card.Header>
-            <Card.Body>
-              <Card.Title>Maker World Reward Tracker</Card.Title>
-              <ProgressBar
-                style={progressBarStyle}
-                now={currentPercentage}
-                aria-valuenow={currentPercentage}
-                label={currentPercentage + '%'}
-                variant={progressBarColor}
-                animated
-              />
+      <Router>
+        <NavBar
+          title={siteTitle}
+          navItems={navItems}
+          isDarkMode={isDarkMode}
+          setIsDarkMode={setIsDarkMode}
+        />
+        <Routes>
+          <Route
+            path="/"
+            element={<RewardTracker
+              error={error}
+              currentPoints={currentPoints}
+              neededPoints={neededPoints}
+              currentPercentage={currentPercentage}
+              progressBarColor={progressBarColor}
+              lastUpdate={lastUpdate}
+              setCurrentPoints={setCurrentPoints}
+              setCurrentPercentage={setCurrentPercentage}
+              setError={setError}
+              setProgressBarColor={setProgressBarColor}
+              setLastUpdate={setLastUpdate}
+            />}
+          />
+          <Route
+            path="/filament-dry-times"
+            element={<FilamentDryTimes isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />}
+          />
+        </Routes>
+      </Router>
 
-              <br />
-              <Form>
-                <Form.Group>
-                  <Form.Label>Percentage: {currentPercentage}%</Form.Label>
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>
-                    Points: {currentPoints} / {neededPoints}
-                  </Form.Label>
-                </Form.Group>
-              </Form>
-            </Card.Body>
-            <Card.Footer>Last Updated: {lastUpdate}</Card.Footer>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={isDarkMode ? 'dark' : 'light'}
+      />
+    </>
   );
 };
 
@@ -173,6 +119,5 @@ const mapDispatchToProps = {
   setProgressBarColor,
 };
 
-
-const ReduxApp =  connect(mapStateToProps, mapDispatchToProps)(App);
+const ReduxApp = connect(mapStateToProps, mapDispatchToProps)(App);
 export default ReduxApp;

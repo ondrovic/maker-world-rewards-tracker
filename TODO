@@ -1,5 +1,4 @@
 
 project:
   frontend:
-    ☐ Toast Errors
-      Need to display any errors coming back from the other services
+    ✔ Toast Errors @done(24-10-15 17:51)
