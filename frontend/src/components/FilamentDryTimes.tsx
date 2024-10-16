@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Col, Container, Form, OverlayTrigger, Row, Table, Tooltip } from 'react-bootstrap';
+import { Col, Container, Form, Row, Table } from 'react-bootstrap';
 
 const FilamentDryTimes: React.FC<ThemeToggleProps> = ({ isDarkMode, setIsDarkMode }) => {
     const [filamentData] = useState<FilamentData[]>([
@@ -26,30 +26,14 @@ const FilamentDryTimes: React.FC<ThemeToggleProps> = ({ isDarkMode, setIsDarkMod
     // Extract unique materials dynamically
     const uniqueMaterials = Array.from(new Set(filamentData.map(data => data.material)));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const renderTooltip = (props: any) => (
-        <Tooltip id="theme-tooltip" {...props}>
-            {isDarkMode ? 'Light' : 'Dark'}
-        </Tooltip>
-    );
-
     useEffect(() => {
         document.documentElement.setAttribute('data-bs-theme', isDarkMode ? 'dark' : 'light');
-    }, [isDarkMode]);
+    }, [isDarkMode, setIsDarkMode]);
 
     return (
         <Container className="mt-4">
             <Row>
-                <Col xs={1}>
-                    <OverlayTrigger placement="top" overlay={renderTooltip}>
-                        <i
-                            className="fas fa-adjust"
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => setIsDarkMode(!isDarkMode)} // Toggle dark mode via parent setter
-                        />
-                    </OverlayTrigger>
-                </Col>
-                <Col xs={11}>
+                <Col xs={12}>
                     <Form.Select id="materialFilter" onChange={handleMaterialChange}>
                         <option value="all">Select a Material</option>
                         {uniqueMaterials.map((material, index) => (

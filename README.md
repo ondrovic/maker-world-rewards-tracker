@@ -2,7 +2,9 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/ondrovic/maker-world-rewards-tracker/badge)](https://www.codefactor.io/repository/github/ondrovic/maker-world-rewards-tracker)
 # Maker World Reward Tracker
 
-![Alt text](image.png)
+![Reward Tracker](assets/images/reward_tracker.png)
+
+![Filament Dry Times](assets/images/dry_times.png)
 
 ## Project Structure
 
@@ -45,7 +47,7 @@ After successfully [Deploying](#Deployment)
 
    You should see something similar
 
-![Alt text](swagger_ui.png)
+![Alt text](assets/images/swagger_ui.png)
 
 
 ## Technologies used
