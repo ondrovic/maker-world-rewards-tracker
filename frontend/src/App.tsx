@@ -57,6 +57,7 @@ const App: React.FC<AppProps> = ({
           title={siteTitle}
           navItems={navItems}
           isDarkMode={isDarkMode}
+          collapseOnSelect={true}
           setIsDarkMode={setIsDarkMode}
         />
         <Routes>
