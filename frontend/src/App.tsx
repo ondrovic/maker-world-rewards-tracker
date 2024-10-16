@@ -60,6 +60,7 @@ const App: React.FC<AppProps> = ({
           collapseOnSelect={true}
           setIsDarkMode={setIsDarkMode}
         />
+        <br />
         <Routes>
           <Route
             path="/"
