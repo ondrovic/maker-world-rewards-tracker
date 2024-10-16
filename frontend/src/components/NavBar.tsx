@@ -1,14 +1,21 @@
 import React from "react";
 import { Nav, Navbar, NavbarBrand } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import ThemeToggle from "./ThemeToggle";
+import { NavBarProps } from "../interfaces/NavBarProps";
 
+const NavBar: React.FC<NavBarProps> = ({ title, navItems, isDarkMode, collapseOnSelect, setIsDarkMode }) => {
+    const location = useLocation();
 
-const NavBar: React.FC<NavBarProps> = ({ title, navItems, isDarkMode, setIsDarkMode }) => {
     return (
-        <Navbar collapseOnSelect expand="lg" bg={isDarkMode ? 'dark' : 'light'} variant={isDarkMode ? 'dark' : 'light'}>
+        <Navbar 
+            collapseOnSelect={collapseOnSelect}
+            expand="lg" 
+            bg={isDarkMode ? 'dark' : 'light'} 
+            variant={isDarkMode ? 'dark' : 'light'}
+        >
             <div className="container">
                 <NavbarBrand className="mx-auto">{title}</NavbarBrand>
                 <Navbar.Toggle aria-controls="responsive-navbar-nav" />
@@ -16,7 +23,14 @@ const NavBar: React.FC<NavBarProps> = ({ title, navItems, isDarkMode, setIsDarkM
                     <Nav className="mx-auto">
                         {navItems.map((item, index) => (
                             <Nav.Item key={index}>
-                                <Nav.Link as={Link} to={item.href}>{item.name}</Nav.Link>
+                                <Nav.Link 
+                                    eventKey={index}
+                                    as={Link} 
+                                    to={item.href}
+                                    className={location.pathname === item.href ? 'active' : ''}
+                                >
+                                    {item.name}
+                                </Nav.Link>
                             </Nav.Item>
                         ))}
                     </Nav>
@@ -28,6 +42,5 @@ const NavBar: React.FC<NavBarProps> = ({ title, navItems, isDarkMode, setIsDarkM
         </Navbar>
     );
 };
-
 
 export default NavBar;
