@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Col, Container, Form, Row, Table } from 'react-bootstrap';
-import { containerStyle } from '../styles/styles';
 import { ThemeToggleProps } from '../interfaces/ThemeToggleProps';
 import { FilamentData } from '../interfaces/FilamentData';
 
@@ -34,7 +33,7 @@ const FilamentDryTimes: React.FC<ThemeToggleProps> = ({ isDarkMode, setIsDarkMod
     }, [isDarkMode, setIsDarkMode]);
 
     return (
-        <Container className="flex" style={containerStyle}>
+        <Container className="flex">
             <Row>
                 <Col xs={12}>
                     <Form.Select id="materialFilter" onChange={handleMaterialChange}>

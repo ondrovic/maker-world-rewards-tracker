@@ -4,7 +4,7 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { RewardTrackerProps } from '../interfaces/RewardTrackerProps';
-import { cardStyle, containerStyle, progressBarStyle } from '../styles/styles';
+import { cardStyle, progressBarStyle } from '../styles/styles';
 
 const RewardTracker: React.FC<RewardTrackerProps> = ({
   currentPoints,
@@ -121,7 +121,7 @@ const RewardTracker: React.FC<RewardTrackerProps> = ({
   }, [currentPoints, neededPoints, calculatePercentage]);
 
   return (
-    <Container className="flex" style={containerStyle}>
+    <Container className="flex">
       <Row>
         <Col>
           <Card style={cardStyle}>
