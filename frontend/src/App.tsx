@@ -52,7 +52,7 @@ const App: React.FC<AppProps> = ({
       <Helmet>
         <title>{siteTitle}</title>
       </Helmet>
-      <Router>
+      <Router basename='/'>
         <NavBar
           title={siteTitle}
           navItems={navItems}
