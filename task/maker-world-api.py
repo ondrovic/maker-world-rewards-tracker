@@ -26,10 +26,15 @@ def get_access_token():
         "account": get_env_variable("ACCOUNT"),
         "password": get_env_variable("PASSWORD"),
     }
-    headers = {"Content-Type": "application/json"}
-
-    response = requests.post(login_url, data=json.dumps(login_payload), headers=headers)
-
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "Accept": "*/*",
+        "Connection": "keep-alive"
+    }
+    session = requests.Session()
+    response = session.post(login_url, json=login_payload, headers=headers)
+    
     if response.status_code == 200:
         data = response.json()
         return data.get("accessToken")
@@ -41,10 +46,16 @@ def get_access_token():
 # Function to call the profile endpoint and extract the point value
 def get_point_value(access_token):
     profile_url = get_env_variable("PROFILE_API_ENDPOINT")
-    headers = {"Authorization": f"Bearer {access_token}"}
-
-    response = requests.get(profile_url, headers=headers)
-
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "Authorization": f"Bearer {access_token}"
+    }
+    session = requests.Session()
+    response = session.get(profile_url, headers=headers)
+    
     if response.status_code == 200:
         data = response.json()
         point_value = data.get("point", None)
