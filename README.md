@@ -1,5 +1,8 @@
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![CodeFactor](https://www.codefactor.io/repository/github/ondrovic/maker-world-rewards-tracker/badge)](https://www.codefactor.io/repository/github/ondrovic/maker-world-rewards-tracker)
+# IMPORTANT: 2024-11-01
+As of now the automated task to retrieve points from BL api is broken, this is due to them updating to cloudflare and changing some settings, I am looking into a work around for this Ticket: https://github.com/ondrovic/maker-world-rewards-tracker/issues/9
+
 # Maker World Reward Tracker
 
 ![Reward Tracker](assets/images/reward_tracker.png)
