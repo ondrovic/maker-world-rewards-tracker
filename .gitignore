@@ -4,5 +4,9 @@
 !.env.example
 # ignore venv
 venv/
+**/.venv/*
+# ignore
+data/auth.json
+
 # ignore .vsvode
 .vscode/
