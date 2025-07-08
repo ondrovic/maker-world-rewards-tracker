@@ -30,12 +30,19 @@ As of now the automated task to retrieve points from BL api is broken, this is d
 
 1. Rename `.env.example` to `.env` under the `root` project
    a. Update the `AUTH_FILENAME` to point to your auth.json file (default: `data/auth.json`)
+   
+   **NOTE:** auth.json is currently generated using this tool: [Bambulab Authentication CLI](https://github.com/ondrovic/bambulab-authentication-cli)
 2. Rename `.env.example` to `.env` under the `frontend` project
+   
    a. **_Note:_** `http://docker.internal` only works if you properly have an entry for it either in `/ect/hosts` (linux) -or- `C:\Windows\System32\drivers\etc\hosts`
+   
    b. **_Note:_** If you plan on accessing this on other devices on your network you are going to need to update the `VITE_APP_POINTS_ROUTE` and `VITE_APP_UPDATED_ROUTE` with the `IP Address of the machine its going to be running on ex: 192.168.0.215`
+   
    c. update your `TIMEZONE` to match [info here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)
+   
    d. `VITE_POINTS_NEEDED` - you can change this to anything you want to track it's set for a single `$40` gift card which is `490` points
 3. Ensure you have a valid `auth.json` file in the `data/` folder containing your Maker World access token
+   
    a. The file should contain: `{"token": "your_access_token_here", ...}`
 4. Rename `data.json.example` to `data.json` under the `data` folder
 5. Rename `last-updated.json.example` to `last-updated.json` under the `data` folder

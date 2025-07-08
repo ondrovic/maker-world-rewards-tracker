@@ -130,15 +130,6 @@ const RewardTracker: React.FC<RewardTrackerProps> = ({
             </Card.Header>
             <Card.Body>
               <Card.Title />
-              {/* <ProgressBar
-                style={progressBarStyle}
-                now={currentPercentage}
-                aria-valuenow={currentPercentage}
-                aria-label='Reward Progress'
-                variant={progressBarColor}
-                animated
-                label=''
-              /> */}
               <div style={{ position: 'relative', width: '100%' }}>
                 <ProgressBar
                   style={progressBarStyle}
@@ -148,6 +139,7 @@ const RewardTracker: React.FC<RewardTrackerProps> = ({
                   variant={progressBarColor}
                   animated
                   label="" // important to disable built-in label
+                  title={`${currentPoints} of ${neededPoints} points earned`}
                 />
                 <div
                   style={{
@@ -169,52 +161,6 @@ const RewardTracker: React.FC<RewardTrackerProps> = ({
                 </div>
               </div>
               <br />
-              <div style={{ position: 'relative', width: '100%' }}>
-                <ProgressBar
-                  style={progressBarStyle}
-                  now={currentPoints}
-                  min={0}
-                  max={neededPoints}
-                  aria-valuenow={currentPoints}
-                  aria-label="current-points"
-                  aria-valuemin={0}
-                  aria-valuemax={neededPoints}
-                  variant={progressBarColor}
-                  animated
-                  label="" // important to disable built-in label
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.5rem',
-                    fontWeight: 'bolder',
-                    pointerEvents: 'none', // ensures it's clickable-through
-                    color: 'white', // or match your theme
-                  }}
-                >
-                  {`${currentPoints} / ${neededPoints}`}
-                </div>
-              </div>
-
-              {/* <Form className="mt-3">
-                <Form.Group as={Row} controlId="formProgress">
-                  <Form.Label col>
-                    Progress: {currentPercentage} %
-                  </Form.Label>
-                </Form.Group>
-                <Form.Group as={Row} controlId="formPoints">
-                  <Form.Label col>
-                    Points: {currentPoints} / {neededPoints}
-                  </Form.Label>
-                </Form.Group>
-              </Form> */}
             </Card.Body>
             <Card.Footer>Last Updated: {lastUpdate}</Card.Footer>
           </Card>
