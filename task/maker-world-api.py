@@ -19,27 +19,21 @@ def get_env_variable(key):
     return value
 
 
-# Function to call the login endpoint and get the access token
+# Function to read the access token from auth.json file
 def get_access_token():
-    login_url = get_env_variable("LOGIN_API_ENDPOINT")
-    login_payload = {
-        "account": get_env_variable("ACCOUNT"),
-        "password": get_env_variable("PASSWORD"),
-    }
-    headers = {
-        "Content-Type": "application/json; charset=utf-8",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-        "Accept": "*/*",
-        "Connection": "keep-alive"
-    }
-    session = requests.Session()
-    response = session.post(login_url, json=login_payload, headers=headers)
-    
-    if response.status_code == 200:
-        data = response.json()
-        return data.get("accessToken")
-    else:
-        print("Error in login:", response.text)
+    auth_file_path = get_env_variable("AUTH_FILENAME")
+    try:
+        with open(auth_file_path, "r") as auth_file:
+            auth_data = json.load(auth_file)
+            return auth_data.get("token")
+    except FileNotFoundError:
+        print(f"Error: {auth_file_path} not found")
+        return None
+    except json.JSONDecodeError:
+        print(f"Error: Invalid JSON in {auth_file_path}")
+        return None
+    except Exception as e:
+        print(f"Error reading auth file: {e}")
         return None
 
 
