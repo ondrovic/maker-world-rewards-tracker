@@ -1,124 +1,106 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Card, Col, Container, /*Form,*/ Row } from 'react-bootstrap';
 import ProgressBar from 'react-bootstrap/ProgressBar';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { RewardTrackerProps } from '../interfaces/RewardTrackerProps';
 import { cardStyle, progressBarStyle } from '../styles/styles';
 
-const RewardTracker: React.FC<RewardTrackerProps> = ({
+// Centralized config and types
+const pointsUrl = import.meta.env.VITE_APP_POINTS_ROUTE || '';
+const lastUpdatedUrl = import.meta.env.VITE_APP_UPDATED_ROUTE || '';
+const updatedStreamUrl = import.meta.env.VITE_APP_UPDATED_STREAM_ROUTE || '/last-updated/stream';
+
+type PointsResponse = { currentPoints: number };
+type LastUpdatedResponse = { lastUpdate: string };
+
+// DRY fetch helper
+const fetchJson = async <T,>(url: string): Promise<T | null> => {
+  if (!url) return null;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    console.debug('Fetch error:', e);
+    return null;
+  }
+};
+
+const RewardTracker: React.FC<RewardTrackerProps & { pollingStatus?: string; setPollingStatus?: (status: string) => void }> = ({
   currentPoints,
   neededPoints,
-  currentPercentage,
-  progressBarColor,
+  // currentPercentage,
+  // progressBarColor,
   lastUpdate,
   setCurrentPoints,
   setLastUpdate,
   setError,
   setCurrentPercentage,
   setProgressBarColor,
+  // pollingStatus,
+  setPollingStatus,
 }) => {
-  const getProgressBarColor = useCallback(() => {
-    if (currentPercentage <= 33) {
-      setProgressBarColor('info');
-    } else if (currentPercentage <= 90) {
-      setProgressBarColor('danger');
-    } else {
-      setProgressBarColor('success');
-    }
-  }, [currentPercentage, setProgressBarColor]);
+  const lastUpdateRef = useRef<string | null>(null);
 
-  const calculatePercentage = useCallback(() => {
-    try {
-      if (neededPoints === 0) {
-        throw new Error('Cannot calculate percentage when neededPoints is 0');
-      }
+  // Memoized progress percentage
+  const progressPercent = useMemo(() => {
+    if (neededPoints === 0) return 0;
+    return parseFloat(((currentPoints / neededPoints) * 100).toFixed(2));
+  }, [currentPoints, neededPoints]);
 
-      const percentage = (currentPoints / neededPoints) * 100;
-      setCurrentPercentage(parseFloat(percentage.toFixed(2)));
-      getProgressBarColor();
-      setError(null);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
+  // Memoized progress bar color logic
+  const progressColor = useMemo(() => {
+    if (progressPercent <= 33) return 'info';
+    if (progressPercent <= 90) return 'danger';
+    return 'success';
+  }, [progressPercent]);
 
-        // Ensure the toast notification shows only once for the same error
-        const toastId = `error-${err.message}`;
-        if (!toast.isActive(toastId)) {
-          toast.error(err.message, { toastId });
-        }
-      }
-    }
-  }, [currentPoints, neededPoints, setCurrentPercentage, setError, getProgressBarColor]);
-
+  // Initial fetch
   useEffect(() => {
     const fetchData = async () => {
-      const pointsUrl = import.meta.env.VITE_APP_POINTS_ROUTE || '';
-      const lastUpdatedUrl = import.meta.env.VITE_APP_UPDATED_ROUTE || '';
+      const pointsData = await fetchJson<PointsResponse>(pointsUrl);
+      const lastUpdatedData = await fetchJson<LastUpdatedResponse>(lastUpdatedUrl);
+      if (pointsData) setCurrentPoints(pointsData.currentPoints);
+      if (lastUpdatedData) setLastUpdate(lastUpdatedData.lastUpdate);
+    };
+    fetchData();
+  }, [setCurrentPoints, setLastUpdate]);
 
-      const getEndpointFromUrl = (url: string) => {
-        try {
-          const parsedUrl = new URL(url);
-          return parsedUrl.pathname.startsWith('/') ? parsedUrl.pathname.slice(1) : parsedUrl.pathname;
-        } catch {
-          return url; // Fallback in case parsing fails
-        }
-      };
-
-
+  // SSE for last update
+  useEffect(() => {
+    if (!setPollingStatus) return;
+    setPollingStatus('SSE: Listening for updates');
+    const evtSource = new window.EventSource(updatedStreamUrl);
+    evtSource.onmessage = async (event) => {
+      setPollingStatus('SSE: Update received');
       try {
-        const pointsResponse = await fetch(pointsUrl).catch(err => {
-          // Add custom error with just the endpoint
-          throw new Error(`${getEndpointFromUrl(pointsUrl)}: ${err.message}`);
-        });
-
-        if (!pointsResponse.ok) {
-          throw new Error(`${getEndpointFromUrl(pointsUrl)} (Status: ${pointsResponse.status})`);
+        const data = JSON.parse(event.data);
+        if (data.lastUpdate && data.lastUpdate !== lastUpdateRef.current) {
+          lastUpdateRef.current = data.lastUpdate;
+          setLastUpdate(data.lastUpdate);
+          // Optionally, fetch points data as well
+          const pointsData = await fetchJson<PointsResponse>(pointsUrl);
+          if (pointsData) setCurrentPoints(pointsData.currentPoints);
         }
-
-        const lastUpdatedResponse = await fetch(lastUpdatedUrl).catch(err => {
-          // Add custom error with just the endpoint
-          throw new Error(`${getEndpointFromUrl(lastUpdatedUrl)}: ${err.message}`);
-        });
-
-        if (!lastUpdatedResponse.ok) {
-          throw new Error(`${getEndpointFromUrl(lastUpdatedUrl)} (Status: ${lastUpdatedResponse.status})`);
-        }
-
-        const [pointsData, lastUpdatedData] = await Promise.all([
-          pointsResponse.json(),
-          lastUpdatedResponse.json(),
-        ]);
-
-        setCurrentPoints(pointsData.currentPoints);
-        setLastUpdate(lastUpdatedData.lastUpdate);
-      } catch (err) {
-        if (err instanceof Error) {
-          const errorMessage = err.message;
-
-          // Handle network failure
-          if (errorMessage.includes('Failed to fetch')) {
-            setError(errorMessage);
-
-            // Create a unique toastId based on the error message
-            const toastId = `error-${errorMessage}`;
-
-            // Prevent duplicate toasts for the same error message
-            if (!toast.isActive(toastId)) {
-              toast.error(errorMessage, { toastId });
-            }
-          }
-        }
+      } catch (e) {
+        setPollingStatus('SSE: Error parsing event');
       }
     };
+    evtSource.onerror = () => {
+      setPollingStatus('SSE: Connection error');
+    };
+    return () => {
+      evtSource.close();
+      setPollingStatus('SSE: Disconnected');
+    };
+  }, [setLastUpdate, setCurrentPoints, setPollingStatus]);
 
-    fetchData();
-  }, [setCurrentPoints, setLastUpdate, setError]);
-
-  // Trigger calculatePercentage whenever currentPoints or neededPoints changes
+  // Update progress bar color and percentage in Redux if needed
   useEffect(() => {
-    calculatePercentage();
-  }, [currentPoints, neededPoints, calculatePercentage]);
+    setCurrentPercentage(progressPercent);
+    setProgressBarColor(progressColor);
+    setError(null);
+  }, [progressPercent, progressColor, setCurrentPercentage, setProgressBarColor, setError]);
 
   return (
     <Container className="flex">
@@ -133,12 +115,12 @@ const RewardTracker: React.FC<RewardTrackerProps> = ({
               <div style={{ position: 'relative', width: '100%' }}>
                 <ProgressBar
                   style={progressBarStyle}
-                  now={currentPercentage}
-                  aria-valuenow={currentPercentage}
+                  now={progressPercent}
+                  aria-valuenow={progressPercent}
                   aria-label="current-progress"
-                  variant={progressBarColor}
+                  variant={progressColor}
                   animated
-                  label="" // important to disable built-in label
+                  label=""
                   title={`${currentPoints} of ${neededPoints} points earned`}
                 />
                 <div
@@ -153,11 +135,11 @@ const RewardTracker: React.FC<RewardTrackerProps> = ({
                     justifyContent: 'center',
                     fontSize: '1.5rem',
                     fontWeight: 'bolder',
-                    pointerEvents: 'none', // ensures it's clickable-through
-                    color: 'white', // or match your theme
+                    pointerEvents: 'none',
+                    color: 'white',
                   }}
                 >
-                  {`${currentPercentage.toFixed(2)} %`}
+                  {`${progressPercent.toFixed(2)} %`}
                 </div>
               </div>
               <br />
