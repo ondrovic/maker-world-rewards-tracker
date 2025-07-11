@@ -5,6 +5,7 @@ export const SET_ERROR = 'SET_ERROR';
 export const SET_CURRENT_PERCENTAGE = 'SET_CURRENT_PERCENTAGE';
 export const SET_PROGRESS_BAR_COLOR = 'SET_PROGRESS_BAR_COLOR';
 export const SET_NEEDED_POINTS = 'SET_NEEDED_POINTS';
+export const SET_POLLING_STATUS = 'SET_POLLING_STATUS';
 
 export const setCurrentPoints = (points: number) => ({
   type: SET_CURRENT_POINTS as typeof SET_CURRENT_POINTS,
@@ -27,16 +28,21 @@ export const setError = (error: string | null) => ({
 });
 
 export const setCurrentPercentage = (percent: number) => ({
-    type: SET_CURRENT_PERCENTAGE as typeof SET_CURRENT_PERCENTAGE,
-    payload: percent,
+  type: SET_CURRENT_PERCENTAGE as typeof SET_CURRENT_PERCENTAGE,
+  payload: percent,
 });
 
 export const setProgressBarColor = (color: string) => ({
-    type: SET_PROGRESS_BAR_COLOR as typeof SET_PROGRESS_BAR_COLOR,
-    payload: color,
+  type: SET_PROGRESS_BAR_COLOR as typeof SET_PROGRESS_BAR_COLOR,
+  payload: color,
 });
 
 export const setNeededPoints = (points: number) => ({
   type: SET_NEEDED_POINTS as typeof SET_NEEDED_POINTS,
   payload: points,
+});
+
+export const setPollingStatus = (status: string) => ({
+  type: SET_POLLING_STATUS as typeof SET_POLLING_STATUS,
+  payload: status,
 });

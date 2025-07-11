@@ -1,17 +1,18 @@
 import { combineReducers } from 'redux';
 
-import { 
+import {
+  SetCurrentPercentageAction,
   SetCurrentPointsAction,
-  SetNeededPointsAction,
-  SetLastUpdateAction,
-  SetIsDarkModeAction,
   SetErrorAction,
-  SetProgressBarColorAction,
-  SetCurrentPercentageAction 
+  SetIsDarkModeAction,
+  SetLastUpdateAction,
+  SetNeededPointsAction,
+  SetPollingStatusAction,
+  SetProgressBarColorAction
 } from '../interfaces/ActionTypes';
 
 const neededPoints = (state = parseInt(import.meta.env.VITE_APP_NEEDED_POINTS), action: SetNeededPointsAction) => {
-  switch(action.type) {
+  switch (action.type) {
     case 'SET_NEEDED_POINTS':
       return action.payload;
     default:
@@ -56,7 +57,7 @@ const error = (state = null, action: SetErrorAction) => {
 };
 
 const progressBarColor = (state = 'info', action: SetProgressBarColorAction) => {
-  switch(action.type) {
+  switch (action.type) {
     case 'SET_PROGRESS_BAR_COLOR':
       return action.payload
     default: return state;
@@ -64,10 +65,19 @@ const progressBarColor = (state = 'info', action: SetProgressBarColorAction) => 
 };
 
 const currentPercentage = (state = 0, action: SetCurrentPercentageAction) => {
-  switch(action.type) {
+  switch (action.type) {
     case 'SET_CURRENT_PERCENTAGE':
       return action.payload
     default: return state;
+  }
+};
+
+const pollingStatus = (state = '', action: SetPollingStatusAction) => {
+  switch (action.type) {
+    case 'SET_POLLING_STATUS':
+      return action.payload;
+    default:
+      return state;
   }
 };
 
@@ -79,6 +89,7 @@ const rootReducer = combineReducers({
   lastUpdate,
   isDarkMode,
   error,
+  pollingStatus,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

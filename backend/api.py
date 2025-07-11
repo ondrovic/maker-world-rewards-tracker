@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 import re
 from decimal import Decimal, ROUND_DOWN
 import uvicorn
+from sse_starlette.sse import EventSourceResponse
+import asyncio
+import time
 
 load_dotenv()
 
@@ -116,6 +119,28 @@ async def calculate_needed_points(request: DollarAmountRequest) -> JSONResponse:
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/last-updated/stream")
+async def last_updated_stream():
+    last_update_path = get_env_variable("LAST_UPDATE_FILENAME")
+    last_sent = None
+    async def event_generator():
+        nonlocal last_sent
+        while True:
+            try:
+                with open(last_update_path, "r") as f:
+                    data = json.load(f)
+                    last_update = data.get("lastUpdate", "")
+            except FileNotFoundError:
+                last_update = ""
+            if last_update and last_update != last_sent:
+                last_sent = last_update
+                yield {
+                    "event": "message",
+                    "data": json.dumps({"lastUpdate": last_update})
+                }
+            await asyncio.sleep(2)  # Check every 2 seconds
+    return EventSourceResponse(event_generator())
 
 if __name__ == "__main__":
     uvicorn.run(app, host=get_env_variable("API_BIND_ADDRESS"), port=int(get_env_variable("API_PORT")), log_level="info")

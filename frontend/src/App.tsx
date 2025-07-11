@@ -15,11 +15,12 @@ import {
   setIsDarkMode,
   setLastUpdate,
   setNeededPoints,
+  setPollingStatus,
   setProgressBarColor
 } from './redux/actions';
 import { RootState } from './redux/reducers';
 
-const App: React.FC<AppProps> = ({
+const App: React.FC<AppProps & { pollingStatus: string; setPollingStatus: (status: string) => void }> = ({
   currentPoints,
   neededPoints,
   currentPercentage,
@@ -32,6 +33,9 @@ const App: React.FC<AppProps> = ({
   setError,
   setCurrentPercentage,
   setProgressBarColor,
+  pollingStatus,
+  setPollingStatus,
+  error,
 }) => {
 
   const navItems = [
@@ -41,11 +45,18 @@ const App: React.FC<AppProps> = ({
 
   const siteTitle = import.meta.env.VITE_APP_TITLE || '';
 
-  const error = null
-  // Use useEffect to handle theme updates
   useEffect(() => {
-    document.documentElement.dataset.bsTheme = isDarkMode ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-bs-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
+
+  useEffect(() => {
+    if (error) {
+      // Dynamically import toast to avoid SSR issues
+      import('react-toastify').then(({ toast }) => {
+        toast.error(error);
+      });
+    }
+  }, [error]);
 
   return (
     <>
@@ -64,23 +75,30 @@ const App: React.FC<AppProps> = ({
         <Routes>
           <Route
             path="/"
-            element={<RewardTracker
-              error={error}
-              currentPoints={currentPoints}
-              neededPoints={neededPoints}
-              currentPercentage={currentPercentage}
-              progressBarColor={progressBarColor}
-              lastUpdate={lastUpdate}
-              setCurrentPoints={setCurrentPoints}
-              setCurrentPercentage={setCurrentPercentage}
-              setError={setError}
-              setProgressBarColor={setProgressBarColor}
-              setLastUpdate={setLastUpdate}
-            />}
+            element={<>
+              <RewardTracker
+                error={error}
+                currentPoints={currentPoints}
+                neededPoints={neededPoints}
+                currentPercentage={currentPercentage}
+                progressBarColor={progressBarColor}
+                lastUpdate={lastUpdate}
+                setCurrentPoints={setCurrentPoints}
+                setCurrentPercentage={setCurrentPercentage}
+                setError={setError}
+                setProgressBarColor={setProgressBarColor}
+                setLastUpdate={setLastUpdate}
+                pollingStatus={pollingStatus}
+                setPollingStatus={setPollingStatus}
+              />
+              {/* <div style={{ marginTop: 10, fontSize: '0.9em', color: '#888' }}>
+                <strong>Polling Status:</strong> {pollingStatus}
+              </div> */}
+            </>}
           />
           <Route
             path="/filament-dry-times"
-            element={<FilamentDryTimes isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />}
+            element={<FilamentDryTimes />}
           />
         </Routes>
       </Router>
@@ -109,6 +127,7 @@ const mapStateToProps = (state: RootState) => ({
   lastUpdate: state.lastUpdate,
   isDarkMode: state.isDarkMode,
   error: state.error,
+  pollingStatus: state.pollingStatus,
 });
 
 const mapDispatchToProps = {
@@ -119,6 +138,7 @@ const mapDispatchToProps = {
   setError,
   setCurrentPercentage,
   setProgressBarColor,
+  setPollingStatus,
 };
 
 const ReduxApp = connect(mapStateToProps, mapDispatchToProps)(App);

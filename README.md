@@ -17,10 +17,24 @@ As of now the automated task to retrieve points from BL api is broken, this is d
 `.env` - shared by all the projects except the `UI` which has it's own `.env` file
 `docker-compose.yml` - docker project
 
-`backend/` - api and related files for the frontend
+`backend/` - api and related files for the frontend (now includes an SSE endpoint for real-time updates)
 `data/` - shared data between containers (includes `auth.json` for authentication)
 `frontend/` - ui
 `task/` - task that syncs your points from `maker-world` to this project
+
+## Real-Time UI Updates
+
+The frontend now uses **Server-Sent Events (SSE)** for instant updates when your points or last update change.
+
+- The backend exposes a new endpoint: `/last-updated/stream`
+- The frontend connects to this endpoint using the `VITE_APP_UPDATED_STREAM_ROUTE` environment variable in its `.env` file.
+- When the backend data changes (via the scheduled task), the UI updates instantly—no more polling delays!
+
+### Frontend .env Example
+
+```
+VITE_APP_UPDATED_STREAM_ROUTE=http://localhost:5001/last-updated/stream
+```
 
 ## Perquisites
 
@@ -30,20 +44,25 @@ As of now the automated task to retrieve points from BL api is broken, this is d
 
 1. Rename `.env.example` to `.env` under the `root` project
    a. Update the `AUTH_FILENAME` to point to your auth.json file (default: `data/auth.json`)
-   
+
    **NOTE:** auth.json is currently generated using this tool: [Bambulab Authentication CLI](https://github.com/ondrovic/bambulab-authentication-cli)
+
 2. Rename `.env.example` to `.env` under the `frontend` project
-   
+
    a. **_Note:_** `http://docker.internal` only works if you properly have an entry for it either in `/ect/hosts` (linux) -or- `C:\Windows\System32\drivers\etc\hosts`
-   
-   b. **_Note:_** If you plan on accessing this on other devices on your network you are going to need to update the `VITE_APP_POINTS_ROUTE` and `VITE_APP_UPDATED_ROUTE` with the `IP Address of the machine its going to be running on ex: 192.168.0.215`
-   
+
+   b. **_Note:_** If you plan on accessing this on other devices on your network you are going to need to update the `VITE_APP_POINTS_ROUTE`, `VITE_APP_UPDATED_ROUTE`, and `VITE_APP_UPDATED_STREAM_ROUTE` with the `IP Address of the machine its going to be running on ex: 192.168.0.215`
+
    c. update your `TIMEZONE` to match [info here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)
-   
+
    d. `VITE_POINTS_NEEDED` - you can change this to anything you want to track it's set for a single `$40` gift card which is `490` points
+
+   e. `VITE_APP_UPDATED_STREAM_ROUTE` - The URL for the backend SSE endpoint (e.g., `http://localhost:5001/last-updated/stream`). This enables real-time UI updates.
+
 3. Ensure you have a valid `auth.json` file in the `data/` folder containing your Maker World access token
-   
+
    a. The file should contain: `{"token": "your_access_token_here", ...}`
+
 4. Rename `data.json.example` to `data.json` under the `data` folder
 5. Rename `last-updated.json.example` to `last-updated.json` under the `data` folder
 6. Update the `TZ=` to match in the `crontab` under the `task` project
@@ -77,6 +96,12 @@ After successfully [Deploying](#Deployment)
 
 ![Alt text](assets/images/swagger_ui.png)
 
+### Notable Endpoints
+
+- `GET /current-points` — Returns the current points.
+- `GET /last-updated` — Returns the last update timestamp.
+- `GET /last-updated/stream` — **Server-Sent Events endpoint for real-time updates.**
+
 ## Technologies used
 
 1. [Docker](https://docker.com/)
@@ -86,3 +111,4 @@ After successfully [Deploying](#Deployment)
 5. [Redux](https://redux.js.org/)
 6. [Python](https://www.python.org/)
    - [FastAPI](https://fastapi.tiangolo.com/)
+   - [sse-starlette](https://github.com/sysid/sse-starlette) (for FastAPI SSE support)
