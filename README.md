@@ -26,14 +26,17 @@ As of now the automated task to retrieve points from BL api is broken, this is d
 
 The frontend now uses **Server-Sent Events (SSE)** for instant updates when your points or last update change.
 
-- The backend exposes a new endpoint: `/last-updated/stream`
-- The frontend connects to this endpoint using the `VITE_APP_UPDATED_STREAM_ROUTE` environment variable in its `.env` file.
+- The backend exposes two SSE endpoints:
+  - `/last-updated/stream` — streams the last update timestamp
+  - `/current-points/stream` — streams the current points value in real time
+- The frontend connects to these endpoints using the `VITE_APP_UPDATED_STREAM_ROUTE` and `VITE_APP_POINT_STREAM_ROUTE` environment variables in its `.env` file.
 - When the backend data changes (via the scheduled task), the UI updates instantly—no more polling delays!
 
 ### Frontend .env Example
 
 ```
 VITE_APP_UPDATED_STREAM_ROUTE=http://localhost:5001/last-updated/stream
+VITE_APP_POINT_STREAM_ROUTE=http://localhost:5001/current-points/stream
 ```
 
 ## Perquisites
@@ -100,7 +103,8 @@ After successfully [Deploying](#Deployment)
 
 - `GET /current-points` — Returns the current points.
 - `GET /last-updated` — Returns the last update timestamp.
-- `GET /last-updated/stream` — **Server-Sent Events endpoint for real-time updates.**
+- `GET /last-updated/stream` — **Server-Sent Events endpoint for real-time last update.**
+- `GET /current-points/stream` — **Server-Sent Events endpoint for real-time current points.**
 
 ## Technologies used
 

@@ -9,6 +9,7 @@ import { cardStyle, progressBarStyle } from '../styles/styles';
 const pointsUrl = import.meta.env.VITE_APP_POINTS_ROUTE || '';
 const lastUpdatedUrl = import.meta.env.VITE_APP_UPDATED_ROUTE || '';
 const updatedStreamUrl = import.meta.env.VITE_APP_UPDATED_STREAM_ROUTE || '/last-updated/stream';
+const pointStreamUrl = import.meta.env.VITE_APP_POINT_STREAM_ROUTE || '/current-points/stream';
 
 type PointsResponse = { currentPoints: number };
 type LastUpdatedResponse = { lastUpdate: string };
@@ -94,6 +95,31 @@ const RewardTracker: React.FC<RewardTrackerProps & { pollingStatus?: string; set
       setPollingStatus('SSE: Disconnected');
     };
   }, [setLastUpdate, setCurrentPoints, setPollingStatus]);
+
+  // SSE for current points
+  useEffect(() => {
+    if (!setPollingStatus) return;
+    setPollingStatus('SSE: Listening for points');
+    const evtSource = new window.EventSource(pointStreamUrl);
+    evtSource.onmessage = (event) => {
+      setPollingStatus('SSE: Points update received');
+      try {
+        const data = JSON.parse(event.data);
+        if (typeof data.currentPoints === 'number') {
+          setCurrentPoints(data.currentPoints);
+        }
+      } catch (e) {
+        setPollingStatus('SSE: Error parsing points event');
+      }
+    };
+    evtSource.onerror = () => {
+      setPollingStatus('SSE: Points connection error');
+    };
+    return () => {
+      evtSource.close();
+      setPollingStatus('SSE: Points disconnected');
+    };
+  }, [setCurrentPoints, setPollingStatus]);
 
   // Update progress bar color and percentage in Redux if needed
   useEffect(() => {
