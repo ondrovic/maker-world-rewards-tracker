@@ -120,7 +120,7 @@ async def calculate_needed_points(request: DollarAmountRequest) -> JSONResponse:
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.get("/last-updated/stream")
+@app.get("/last-updated/stream", tags=["status"])
 async def last_updated_stream():
     last_update_path = get_env_variable("LAST_UPDATE_FILENAME")
     last_sent = None
@@ -142,7 +142,7 @@ async def last_updated_stream():
             await asyncio.sleep(2)  # Check every 2 seconds
     return EventSourceResponse(event_generator())
 
-@app.get("/current-points/stream")
+@app.get("/current-points/stream", tags=["points"])
 async def current_points_stream():
     data_path = get_env_variable("DATA_FILENAME")
     last_sent = None
