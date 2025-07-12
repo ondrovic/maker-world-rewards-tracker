@@ -142,5 +142,27 @@ async def last_updated_stream():
             await asyncio.sleep(2)  # Check every 2 seconds
     return EventSourceResponse(event_generator())
 
+@app.get("/current-points/stream")
+async def current_points_stream():
+    data_path = get_env_variable("DATA_FILENAME")
+    last_sent = None
+    async def event_generator():
+        nonlocal last_sent
+        while True:
+            try:
+                with open(data_path, "r") as f:
+                    data = json.load(f)
+                    current_points = data.get("currentPoints", None)
+            except FileNotFoundError:
+                current_points = None
+            if current_points is not None and current_points != last_sent:
+                last_sent = current_points
+                yield {
+                    "event": "message",
+                    "data": json.dumps({"currentPoints": current_points})
+                }
+            await asyncio.sleep(2)  # Check every 2 seconds
+    return EventSourceResponse(event_generator())
+
 if __name__ == "__main__":
     uvicorn.run(app, host=get_env_variable("API_BIND_ADDRESS"), port=int(get_env_variable("API_PORT")), log_level="info")
