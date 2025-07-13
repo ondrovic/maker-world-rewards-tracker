@@ -12,6 +12,7 @@ import uvicorn
 from sse_starlette.sse import EventSourceResponse
 import asyncio
 import time
+from json import JSONDecodeError
 
 load_dotenv()
 
@@ -129,8 +130,11 @@ async def last_updated_stream():
         while True:
             try:
                 with open(last_update_path, "r") as f:
-                    data = json.load(f)
-                    last_update = data.get("lastUpdate", "")
+                    try:
+                        data = json.load(f)
+                        last_update = data.get("lastUpdate", "")
+                    except JSONDecodeError:
+                        last_update = ""
             except FileNotFoundError:
                 last_update = ""
             if last_update and last_update != last_sent:
@@ -151,8 +155,11 @@ async def current_points_stream():
         while True:
             try:
                 with open(data_path, "r") as f:
-                    data = json.load(f)
-                    current_points = data.get("currentPoints", None)
+                    try:
+                        data = json.load(f)
+                        current_points = data.get("currentPoints", None)
+                    except JSONDecodeError:
+                        current_points = None
             except FileNotFoundError:
                 current_points = None
             if current_points is not None and current_points != last_sent:
