@@ -106,6 +106,10 @@ After successfully [Deploying](#Deployment)
 - `GET /last-updated/stream` — **Server-Sent Events endpoint for real-time last update.**
 - `GET /current-points/stream` — **Server-Sent Events endpoint for real-time current points.**
 
+### Error Handling for Streaming Endpoints
+
+If the backend data files (`data.json`, `last-updated.json`) are empty or contain invalid JSON, the streaming endpoints will not crash or log errors. Instead, they will gracefully treat the value as missing and continue streaming once valid data is available. This ensures robust real-time updates even if the data files are temporarily incomplete or being updated.
+
 ## Technologies used
 
 1. [Docker](https://docker.com/)
